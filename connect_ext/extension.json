@@ -1,0 +1,8 @@
+{
+  "name": "connect-extension-inquire-notifications",
+  "description": "Allows sending a customized email to your customer when a subscription is in status Inquiring",
+  "version": "0.1.0",
+  "audience": ["reseller", "distributor"],
+  "readme_url": "https://example.com/README.md",
+  "changelog_url": "https://example.com/CHANGELOG.md"
+}
