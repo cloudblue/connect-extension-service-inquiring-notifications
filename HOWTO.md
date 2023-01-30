@@ -1,49 +1,45 @@
-# Welcome to Connect Extension project connect-extension-inquire-notifications
+# Welcome to Connect Extension Inquiring Notifications !
 
-## Next steps
+Overview
+## About Email Platform
+Email is the most used communication system. With email, you can send messages, photos, videos, and files of any type (doc, zip, mp3, etc).
 
-You may open your favourite IDE and start working with your project, please note that this project runs using docker.
-You may modify at any time the credentials used to authenticate to connect modifying the file *connect_extension_inquire_notifications/.connect_extension_inquire_notifications_dev.env*.
+## Connect Extension Inquiring Notifications
+This **Inquiring Notification Extension** allows sending a customized email to your customer when a subscription is in status "Inquiring".
+If you are a Distributor or a Reseller, you can define three periods of time for when the subscription becomes to the status "Inquiring", the extension sends an email to the customer contact using the template associated with the **installation**.
 
+With this extension, for each installation you can:
+- Create templates customized
+- Define the email sender
+- Include subscription metadata as
+    - Customer name
+    - Asset ID
+- Include subscription metadata blocks as 
+    - Items
+    - Parameters
+- Include links and images
+- See in the extension log the date that the email was sent 
 
+### Settings structure
+To configure the installation is necessary to set up a json with the following structure:
 
-In order to start your extension as a standalone docker container first of all you need to build the docker image for your project. To do that run:
+{
+    "sender_name": "John Doe",
+    "sender_email": "doe@example.com",
+    "email_title": "inquire request",
+    "default_template": "![logo](https://example.com/logo.png) \n ## Additional Information Is Required To Process Your Request \n Hello ${tiers.customer.name}, Additional information is required to process your request for the Product ${asset.product.name} for ${tiers.tier1.name} by Vendor. \n Please complete our ![activation form](${activation_form}) to resume processing of your request",
+    "marketplace_template": [
+        {
+        "template": "Template for marketplace MP-0001",
+        "marketplace": "MP-0001"
+        },
+        {
+        "template": "Template for marketplace MP-0002",
+        "marketplace": "MP-0002"
+        }
+    ]
+    "period": [1,4,10],
+}
 
-```sh
-$ docker compose build
-```
-
-Once your container is built, you can access the project folder and run:
-
-```sh
-$ docker compose up connect_extension_inquire_notifications_dev
-```
-
-> please note that in this way you will run the docker container and if you do changes on the code you will need to stop it and start it again.
-
-
-If you would like to develop and test at the same time, we recommend you run your project using the command:
-
-```sh
-$ docker compose run connect_extension_inquire_notifications_bash
-```
-
-Once you get the interactive shell an help banner will be displayed to inform you about the included tools that can help you with the development of your extension.
-
-
-Additionally, a basic boilerplate for writing unit tests has been created, you can run the tests using:
-
-```sh
-$ docker compose run connect_extension_inquire_notifications_test
-```
-
-
-## Community Resources
-
-Please take note of these links in order to get additional information:
-
-* https://connect.cloudblue.com/
-* https://connect.cloudblue.com/community/modules/devops/
-* https://connect.cloudblue.com/community/sdk/python-openapi-client/
-* https://connect-openapi-client.readthedocs.io/en/latest/
-* https://connect-eaas-core.readthedocs.io/en/latest/
+## License
+**connect-extension-inquire-notifications** is licensed under the *Apache Software License 2.0* license.

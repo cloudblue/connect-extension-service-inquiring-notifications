@@ -43,13 +43,11 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
     @schedulable('Schedulable method', 'It can be used to test DevOps scheduler.')
     def execute_scheduled_processing(self, schedule):  # noqa: CCR001
         try:
-            my_account = self.client.accounts.all().first()['id']
             extension_id = self.context.extension_id
             installations = self.client('devops').services[extension_id].installations.all()
             for installation in installations:
                 installation_admin_client = self.get_installation_admin_client(installation['id'])
-                account = installation['owner']['id']
-                if account != my_account:
+                if installation['owner']['role'] != 'vendor':
                     requests = installation_admin_client.requests.filter(status='inquiring')
                     for request in requests:
                         updated_at = datetime.fromisoformat(request['events']['updated']['at'])
@@ -57,16 +55,16 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                         period = installation['settings']['period']
                         for p in period:
                             if age >= p and age < p + 1:
-                                template = installation['settings']['email_template']
-                                self.logger.info(f"Template: {template}")
                                 try:
-                                    body = markdown.markdown(jinja.render(template, request))
                                     contact = request['asset']['tiers']['customer']
                                     email_to = contact['contact_info']['contact']['email']
-                                    self.logger.info(f"Body: {body}")
+                                    marketplace = request['marketplace']['id']
+                                    body = self.get_body(installation, request, marketplace)
                                     mail_response = self.send_email(
-                                        installation,
+                                        installation['settings']['sender_name'],
+                                        installation['settings']['sender_email'],
                                         email_to,
+                                        installation['settings']['email_title'],
                                         body,
                                     )
                                     self.logger.info(f"Mail response: {mail_response}")
@@ -76,10 +74,21 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
             self.logger.exception("Extension error")
         return ScheduledExecutionResponse.done()
 
+    def get_body(self, installation, request, marketplace):
+        template = installation['settings']['default_template']
+        if 'marketplace_template' in installation['settings']:
+            for element in installation['settings']['marketplace_template']:
+                if element['marketplace'] == marketplace:
+                    template = element['template']
+                    break
+        return markdown.markdown(jinja.render(template, request))
+
     def send_email(
         self,
-        installation,
+        sender_name,
+        sender_email,
         email_to,
+        email_title,
         body,
     ):
         aws_access_key_id = self.config['AWS_ACCESS_KEY_ID']
@@ -94,10 +103,8 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
         )
         self.logger.info(f"ses result: {ses_client}")
 
-        sender_name = installation['settings']['sender_name']
-        email_from = installation['settings']['sender_email']
-        email_source = f'{sender_name} <{email_from}>'
-        subject = installation['settings']['email_title']
+        email_source = f'{sender_name} <{sender_email}>'
+        subject = email_title
 
         msg = MIMEMultipart()
         msg.set_charset(CHARSET)
