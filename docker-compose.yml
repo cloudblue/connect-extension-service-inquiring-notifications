@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  connect_extension_inquire_notifications_dev:
+    container_name: connect_extension_inquire_notifications_dev
+    build:
+      context: .
+    working_dir: /extension
+    command: cextrun -d
+    volumes: 
+      - .:/extension
+    env_file:
+      - .connect_extension_inquire_notifications_dev.env
+
+  connect_extension_inquire_notifications_bash:
+    container_name: connect_extension_inquire_notifications_bash
+    build:
+      context: .
+    working_dir: /extension
+    command: /bin/bash
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/extension
+    env_file:
+      - .connect_extension_inquire_notifications_dev.env
+
+  connect_extension_inquire_notifications_test:
+    container_name: connect_extension_inquire_notifications_test
+    build:
+      context: .
+    working_dir: /extension
+    command: extension-test
+    volumes:
+      - .:/extension
