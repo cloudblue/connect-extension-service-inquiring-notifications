@@ -34,7 +34,7 @@ For more information on how to use the extension, please refer to the extension 
 
 ## Support 
 
-If you need any help or have any questions, please contact our [https://connect.cloudblue.com/community/help/contact-support/](Support Team).
+If you need any help or have any questions, please contact our Support team at https://connect.cloudblue.com/community/help/contact-support/.
 
 ## Contributing 
 
