@@ -67,7 +67,8 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                             marketplace,
                         )
                         for p in period:
-                            if age >= p and age < p + 1:
+                            already_sent = False
+                            if (age % p == 0) and not already_sent:
                                 email_to = get_setting(
                                     'catchall_email',
                                 ) or request['asset']['tiers']['customer'][
@@ -90,10 +91,17 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                                     f"Days from inquiring status: {age} "
                                     f"Email response: {mail_response} ",
                                 )
+                                already_sent = True
                             else:
-                                self.logger.debug(
-                                    f"Skipping send of email for request {request['id']}",
-                                )
+                                if already_sent:
+                                    self.logger.debug(
+                                        f"Skipping send of email for request {request['id']} "
+                                        "since has been already sent",
+                                    )
+                                else:
+                                    self.logger.debug(
+                                        f"Skipping send of email for request {request['id']}",
+                                    )
         except Exception as e:
             self.logger.info(f'Error in template: {e}')
         return ScheduledExecutionResponse.done()
