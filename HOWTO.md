@@ -29,7 +29,6 @@ To configure the installation is necessary to set up a json with the following s
     4,
     10
   ],
-  "force_receiver_email": "receiver@gmail.com"
   "MP-03811": {
     "template": "![logo](https://www.cloudblue.com/assets/images/navlogo-dark.png) \n## Additional Information Is Required To Process Your Request \n### Hello {{request.asset.tiers.customer.name}}, \n### Additional information is required to process your request for the Product {{request.asset.product.name}} for {{request.asset.tiers.tier1.name}} by Vendor.\n### Please complete our [form]({{request.params_form_url}}) to resume processing of your request",
     "email_title": "inquire request",
