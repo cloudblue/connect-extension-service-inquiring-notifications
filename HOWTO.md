@@ -24,21 +24,27 @@ With this extension, for each installation you can:
 To configure the installation is necessary to set up a json with the following structure:
 
 {
-    "sender_name": "John Doe",
-    "sender_email": "doe@example.com",
+  "settings": {
+    "sender_name": "Martin Constante",
+    "sender_email": "martin.constante@cloudblue.com",
     "email_title": "inquire request",
     "default_template": "![logo](https://example.com/logo.png) \n ## Additional Information Is Required To Process Your Request \n Hello ${tiers.customer.name}, Additional information is required to process your request for the Product ${asset.product.name} for ${tiers.tier1.name} by Vendor. \n Please complete our ![activation form](${activation_form}) to resume processing of your request",
     "marketplace_template": [
-        {
-        "template": "Template for marketplace MP-0001",
-        "marketplace": "MP-0001"
-        },
-        {
-        "template": "Template for marketplace MP-0002",
-        "marketplace": "MP-0002"
-        }
+      {
+        "template": "Template for marketplace MP-03811",
+        "marketplace": "MP-03811"
+      },
+      {
+        "template": "Template for marketplace MP-03812",
+        "marketplace": "MP-03812"
+      }
+    ],
+    "period": [
+      1,
+      4,
+      10
     ]
-    "period": [1,4,10],
+  }
 }
 
 ## License

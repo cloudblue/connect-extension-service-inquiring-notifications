@@ -56,32 +56,37 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                         for p in period:
                             if age >= p and age < p + 1:
                                 try:
-                                    contact = request['asset']['tiers']['customer']
-                                    email_to = contact['contact_info']['contact']['email']
-                                    marketplace = request['marketplace']['id']
-                                    body = self.get_body(installation, request, marketplace)
-                                    mail_response = self.send_email(
-                                        installation['settings']['sender_name'],
-                                        installation['settings']['sender_email'],
+                                    data = self.get_data(installation, request)
+                                    if data.get('force_receiver_email'):
+                                        email_to = data['force_receiver_email']
+                                    else:
+                                        contact = request['asset']['tiers']['customer']
+                                        email_to = contact['contact_info']['contact']['email']
+                                    self.send_email(
+                                        data['sender_name'],
+                                        data['sender_email'],
                                         email_to,
-                                        installation['settings']['email_title'],
-                                        body,
+                                        data['email_title'],
+                                        data['template'],
                                     )
-                                    self.logger.info(f"Mail response: {mail_response}")
+                                    self.logger.info(f"Mail sent for request: {request['id']}")
+                                    self.logger.info(f"To:{email_to} From:{data['sender_email']}")
+                                    self.logger.info(f"Days from inquiring status: {age}")
                                 except Exception as e:
                                     self.logger.info(f'Error in template: {e}')
         except Exception:
             self.logger.exception("Extension error")
         return ScheduledExecutionResponse.done()
 
-    def get_body(self, installation, request, marketplace):
-        template = installation['settings']['default_template']
-        if 'marketplace_template' in installation['settings']:
-            for element in installation['settings']['marketplace_template']:
-                if element['marketplace'] == marketplace:
-                    template = element['template']
-                    break
-        return markdown.markdown(jinja.render(template, request))
+    def get_data(self, installation, request):
+        marketplace = request['marketplace']['id']
+        if marketplace in installation['settings']:
+            data = installation['settings'][marketplace]
+        else:
+            data = installation['settings']['defaults']
+        data['template'] = markdown.markdown(jinja.render(data['template'], request))
+
+        return data
 
     def send_email(
         self,
@@ -101,8 +106,6 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
             aws_secret_access_key=aws_secret_access_key,
             region_name=region_name,
         )
-        self.logger.info(f"ses result: {ses_client}")
-
         email_source = f'{sender_name} <{sender_email}>'
         subject = email_title
 
