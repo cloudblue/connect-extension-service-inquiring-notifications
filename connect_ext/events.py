@@ -1,3 +1,5 @@
+import functools
+
 import markdown
 import boto3
 
@@ -53,41 +55,28 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                         updated_at = datetime.fromisoformat(request['events']['updated']['at'])
                         age = (datetime.now(tz=timezone.utc) - updated_at).days
                         period = installation['settings']['period']
+                        marketplace = request['marketplace']['id']
+                        get_setting = functools.partial(
+                            self.get_setting,
+                            installation['settings'],
+                            marketplace,
+                        )
                         for p in period:
                             if age >= p and age < p + 1:
-                                marketplace = request['marketplace']['id']
-                                email_to = self.get_settings(
-                                    installation['settings'],
-                                    marketplace,
+                                email_to = get_setting(
                                     'catchall_email',
                                 ) or request['asset']['tiers']['customer'][
                                     'contact_info'
                                 ]['contact']['email']
-                                sender_email = self.get_settings(
-                                    installation['settings'],
-                                    marketplace,
-                                    'sender_email',
-                                )
-                                template = self.get_settings(
-                                    installation['settings'],
-                                    marketplace,
-                                    'template',
-                                )
+                                sender_email = get_setting('sender_email')
+                                template = get_setting('template')
                                 template = markdown.markdown(jinja.render(template, request))
 
                                 mail_response = self.send_email(
-                                    self.get_settings(
-                                        installation['settings'],
-                                        marketplace,
-                                        'sender_name',
-                                    ),
+                                    get_setting('sender_name'),
                                     sender_email,
                                     email_to,
-                                    self.get_settings(
-                                        installation['settings'],
-                                        marketplace,
-                                        'email_title',
-                                    ),
+                                    get_setting('email_title'),
                                     template,
                                 )
                                 self.logger.info(
@@ -100,7 +89,7 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
             self.logger.info(f'Error in template: {e}')
         return ScheduledExecutionResponse.done()
 
-    def get_settings(self, settings, markertplace_id, setting_name):
+    def get_setting(self, settings, markertplace_id, setting_name):
         return settings.get(
             markertplace_id,
             settings['defaults'],
