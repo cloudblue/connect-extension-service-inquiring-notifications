@@ -49,11 +49,16 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
             installations = self.client('devops').services[extension_id].installations.all()
             for installation in installations:
                 installation_admin_client = self.get_installation_admin_client(installation['id'])
+                self.logger.debug(
+                    f"Working on installation {installation['id']} "
+                    f"for partner {installation['owner']['name']}",
+                )
                 if installation['owner']['role'] != 'vendor':
                     requests = installation_admin_client.requests.filter(status='inquiring')
                     for request in requests:
                         updated_at = datetime.fromisoformat(request['events']['updated']['at'])
                         age = (datetime.now(tz=timezone.utc) - updated_at).days
+                        self.logger.debug(f"Request {request['id']} is in inquiring for {age} days")
                         period = installation['settings']['period']
                         marketplace = request['marketplace']['id']
                         get_setting = functools.partial(
@@ -84,6 +89,10 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                                     f"To:{email_to} From:{sender_email}  "
                                     f"Days from inquiring status: {age} "
                                     f"Email response: {mail_response} ",
+                                )
+                            else:
+                                self.logger.debug(
+                                    f"Skipping send of email for request {request['id']}",
                                 )
         except Exception as e:
             self.logger.info(f'Error in template: {e}')
