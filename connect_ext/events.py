@@ -55,38 +55,59 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                         period = installation['settings']['period']
                         for p in period:
                             if age >= p and age < p + 1:
-                                try:
-                                    data = self.get_data(installation, request)
-                                    if data.get('force_receiver_email'):
-                                        email_to = data['force_receiver_email']
-                                    else:
-                                        contact = request['asset']['tiers']['customer']
-                                        email_to = contact['contact_info']['contact']['email']
-                                    self.send_email(
-                                        data['sender_name'],
-                                        data['sender_email'],
-                                        email_to,
-                                        data['email_title'],
-                                        data['template'],
-                                    )
-                                    self.logger.info(f"Mail sent for request: {request['id']}")
-                                    self.logger.info(f"To:{email_to} From:{data['sender_email']}")
-                                    self.logger.info(f"Days from inquiring status: {age}")
-                                except Exception as e:
-                                    self.logger.info(f'Error in template: {e}')
-        except Exception:
-            self.logger.exception("Extension error")
+                                marketplace = request['marketplace']['id']
+                                email_to = self.get_settings(
+                                    installation['settings'],
+                                    marketplace,
+                                    'catchall_email',
+                                ) or request['asset']['tiers']['customer'][
+                                    'contact_info'
+                                ]['contact']['email']
+                                sender_email = self.get_settings(
+                                    installation['settings'],
+                                    marketplace,
+                                    'sender_email',
+                                )
+                                template = self.get_settings(
+                                    installation['settings'],
+                                    marketplace,
+                                    'template',
+                                )
+                                template = markdown.markdown(jinja.render(template, request))
+
+                                mail_response = self.send_email(
+                                    self.get_settings(
+                                        installation['settings'],
+                                        marketplace,
+                                        'sender_name',
+                                    ),
+                                    sender_email,
+                                    email_to,
+                                    self.get_settings(
+                                        installation['settings'],
+                                        marketplace,
+                                        'email_title',
+                                    ),
+                                    template,
+                                )
+                                self.logger.info(
+                                    f"Mail sent for request: {request['id']}  "
+                                    f"To:{email_to} From:{sender_email}  "
+                                    f"Days from inquiring status: {age} "
+                                    f"Email response: {mail_response} ",
+                                )
+        except Exception as e:
+            self.logger.info(f'Error in template: {e}')
         return ScheduledExecutionResponse.done()
 
-    def get_data(self, installation, request):
-        marketplace = request['marketplace']['id']
-        if marketplace in installation['settings']:
-            data = installation['settings'][marketplace]
-        else:
-            data = installation['settings']['defaults']
-        data['template'] = markdown.markdown(jinja.render(data['template'], request))
-
-        return data
+    def get_settings(self, settings, markertplace_id, setting_name):
+        return settings.get(
+            markertplace_id,
+            settings['defaults'],
+        ).get(
+            setting_name,
+            settings['defaults'].get(setting_name),
+        )
 
     def send_email(
         self,

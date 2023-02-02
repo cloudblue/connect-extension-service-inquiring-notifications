@@ -24,28 +24,32 @@ With this extension, for each installation you can:
 To configure the installation is necessary to set up a json with the following structure:
 
 {
-  "settings": {
-    "sender_name": "Martin Constante",
-    "sender_email": "martin.constante@cloudblue.com",
+  "period": [
+    1,
+    4,
+    10
+  ],
+  "force_receiver_email": "receiver@gmail.com"
+  "MP-03811": {
+    "template": "![logo](https://www.cloudblue.com/assets/images/navlogo-dark.png) \n## Additional Information Is Required To Process Your Request \n### Hello {{request.asset.tiers.customer.name}}, \n### Additional information is required to process your request for the Product {{request.asset.product.name}} for {{request.asset.tiers.tier1.name}} by Vendor.\n### Please complete our [form]({{request.params_form_url}}) to resume processing of your request",
     "email_title": "inquire request",
-    "default_template": "![logo](https://example.com/logo.png) \n ## Additional Information Is Required To Process Your Request \n Hello ${tiers.customer.name}, Additional information is required to process your request for the Product ${asset.product.name} for ${tiers.tier1.name} by Vendor. \n Please complete our ![activation form](${activation_form}) to resume processing of your request",
-    "marketplace_template": [
-      {
-        "template": "Template for marketplace MP-03811",
-        "marketplace": "MP-03811"
-      },
-      {
-        "template": "Template for marketplace MP-03812",
-        "marketplace": "MP-03812"
-      }
-    ],
-    "period": [
-      1,
-      4,
-      10
-    ]
+    "sender_name": "Sender Name",
+    "sender_email": "sender@gmail.com",
+    "catchall_email": "pepe@gmail.com"
+  },
+  "MP-03812": {
+    "template": "Template for marketplace MP-03812",
+    "email_title": "inquire request",
+    "sender_name": "Sender Name",
+    "sender_email": "sender@gmail.com",
+  },
+  "defaults": {
+    "template": "<!DOCTYPE HTML><html><head><title>Subscription product: {{request.asset.product.name}} </title><meta charset=\"utf-8\"></head><body><p>Lista con elementos desordenados</p><ul><li>Uno</li><li>Dos</li><li>Tres</li></ul><p>Lista con sublistas anidadas</p><ul><li>Primero</li><li>Segundo<ul><li>Segundo Uno</li><li>Segundo Dos</li></ul></li><li>Tercero</li></ul></body></html>",
+    "email_title": "inquire request",
+    "sender_name": "Sender Name",
+    "sender_email": "sender@gmail.com",
+    "catchall_email": "pepe@gmail.com"
   }
 }
-
 ## License
 **connect-extension-inquire-notifications** is licensed under the *Apache Software License 2.0* license.
