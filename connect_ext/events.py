@@ -66,8 +66,8 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                             installation['settings'],
                             marketplace,
                         )
+                        already_sent = False
                         for p in period:
-                            already_sent = False
                             if (age % p == 0) and not already_sent:
                                 email_to = get_setting(
                                     'catchall_email',
