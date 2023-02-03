@@ -67,7 +67,7 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                             marketplace,
                         )
                         for p in period:
-                            if (age % p == 0):
+                            if age % p == 0:
                                 email_to = get_setting(
                                     'catchall_email',
                                 ) or request['asset']['tiers']['customer'][
