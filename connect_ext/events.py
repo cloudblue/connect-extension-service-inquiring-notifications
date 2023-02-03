@@ -66,9 +66,8 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                             installation['settings'],
                             marketplace,
                         )
-                        already_sent = False
                         for p in period:
-                            if (age % p == 0) and not already_sent:
+                            if age % p == 0:
                                 email_to = get_setting(
                                     'catchall_email',
                                 ) or request['asset']['tiers']['customer'][
@@ -77,12 +76,13 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                                 sender_email = get_setting('sender_email')
                                 template = get_setting('template')
                                 template = markdown.markdown(jinja.render(template, request))
-
+                                email_title = get_setting('email_title')
+                                email_title = jinja.render(email_title, request)
                                 mail_response = self.send_email(
                                     get_setting('sender_name'),
                                     sender_email,
                                     email_to,
-                                    get_setting('email_title'),
+                                    email_title,
                                     template,
                                 )
                                 self.logger.info(
@@ -91,17 +91,11 @@ class ConnectExtensionInquireNotificationsEventsApplication(EventsApplicationBas
                                     f"Days from inquiring status: {age} "
                                     f"Email response: {mail_response} ",
                                 )
-                                already_sent = True
+                                break
                             else:
-                                if already_sent:
-                                    self.logger.debug(
-                                        f"Skipping send of email for request {request['id']} "
-                                        "since has been already sent",
-                                    )
-                                else:
-                                    self.logger.debug(
-                                        f"Skipping send of email for request {request['id']}",
-                                    )
+                                self.logger.debug(
+                                    f"Skipping send of email for request {request['id']}",
+                                )
         except Exception as e:
             self.logger.info(f'Error in template: {e}')
         return ScheduledExecutionResponse.done()
